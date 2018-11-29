@@ -17,7 +17,7 @@
         </Sider>
         <Layout>
           <Content :style="{padding: '24px',height: '100%'}">
-            <Content :style="{height:'100%', background: '#fff'}">
+            <Content :style="{background: '#fff'}">
               <router-view/>
             </Content>
           </Content>
