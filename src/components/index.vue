@@ -2,17 +2,7 @@
   <div class="layout">
     <Layout :style="{height:'100vh'}">
       <Header>
-        <router-link to="main" style="font-size:1.5em;font-weight:bold;display:inline-block;color:#fff;">直租侠后台管理系统
-        </router-link>
-        <Dropdown @on-click="exit($event)" :style="{float:'right'}">
-          <a class="info-btn" href="javascript:void(0)">艾江南
-            <Icon type="ios-arrow-down"></Icon>
-          </a>
-          <DropdownMenu slot="list">
-            <DropdownItem name="reset">修改密码</DropdownItem>
-            <DropdownItem name="exit">退出</DropdownItem>
-          </DropdownMenu>
-        </Dropdown>
+        <h2 style="color:#fff;text-align:left;">直租侠后台管理系统</h2>
       </Header>
       <Layout>
         <Sider :style="{overflow: 'auto'}">
@@ -84,25 +74,5 @@
 
 <style scoped>
 
-  .layout {
-    background: #f5f7f9;
-    position: relative;
-    border-radius: 4px;
-    overflow: hidden;
-  }
-
-  .layout-footer-center {
-    padding: 0;
-    width: 100%;
-    height: 30px;
-    color: #fff;
-    background: #515a6e;
-    text-align: center;
-    line-height: 30px;
-  }
-
-  .info-btn {
-    color: #fff;
-  }
 
 </style>
