@@ -87,7 +87,4 @@ Ajax.prototype.get = function (url, data, callBack, failer) {
 };
 
 const ajax = new Ajax();
-// ajax.get('/v2/api-docs', {group: '金融产品接口服务API'}, data => {
-//   console.log(data);
-// });
 export default ajax;

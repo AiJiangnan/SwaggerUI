@@ -2,38 +2,22 @@
   <div class="layout">
     <Layout :style="{height:'100vh'}">
       <Header>
-        <h2 style="color:#fff;text-align:left;">直租侠后台管理系统</h2>
+        <h2 style="color:#fff;text-align:left;" @click="alertInfo">{{project}} <sup>{{info.version}}</sup></h2>
       </Header>
       <Layout>
-        <Sider :style="{overflow: 'auto'}">
+        <Sider :style="{overflow: 'auto'}" width="280">
           <Menu accordion theme="dark" width="auto" @on-select="select($event)">
-            <Submenu name="1">
+            <Submenu
+                    v-for="(tag,index) in apiDoc.tags"
+                    :name="index"
+            >
               <template slot="title">
-                <Icon type="ios-analytics"></Icon>
-                系统设置
+                {{tag.name}}
               </template>
-              <MenuItem name="admin">用户管理</MenuItem>
-              <MenuItem name="1-2">Option 2</MenuItem>
-              <MenuItem name="1-3">Option 3</MenuItem>
-              <MenuItem name="1-4">Option 4</MenuItem>
-            </Submenu>
-            <Submenu name="2">
-              <template slot="title">
-                <Icon type="ios-filing"></Icon>
-                Navigation 2
-              </template>
-              <MenuItem name="2-1">Option 5</MenuItem>
-              <MenuItem name="2-2">Option 6</MenuItem>
-            </Submenu>
-            <Submenu name="4">
-              <template slot="title">
-                <Icon type="ios-cog"></Icon>
-                Navigation 3
-              </template>
-              <MenuItem name="4-1">Option 9</MenuItem>
-              <MenuItem name="4-2">Option 10</MenuItem>
-              <MenuItem name="4-3">Option 11</MenuItem>
-              <MenuItem name="4-4">Option 12</MenuItem>
+              <MenuItem
+                      v-for="menu in tag.paths"
+                      :name="menu.url">{{menu.name}}
+              </MenuItem>
             </Submenu>
           </Menu>
         </Sider>
@@ -53,26 +37,78 @@
   export default {
     data() {
       return {
-        breadcrumbItem: ''
+        project: '',
+        apiDoc: {},
+        apiTags: [],
+        info: {}
       }
     },
     methods: {
-      select(name) {
-        location = '/#/' + name;
+      getResources(callback) {
+        this.ajax.get('/swagger-resources', data => {
+          this.project = data[0].name;
+          callback(data[0].name);
+        });
       },
-      exit(name) {
-        if (name === 'exit') {
-          this.$store.commit('logout');
-          location = '/#/';
-        } else if (name === 'reset') {
-          this.$Message.success('修改密码');
+      getApiDoc(project) {
+        this.ajax.get('/v2/api-docs', {group: project}, data => {
+          this.apiDoc = data;
+          this.info = data.info;
+          this.init();
+        });
+      },
+      alertInfo() {
+        const content = `
+          <b>主机: </b><span>${this.apiDoc.host}</span><br>
+          <b>版本: </b><span>${this.info.version}</span><br>
+          <b>描述: </b><span>${this.info.description}</span><br>
+          <b>Swagger: </b><span>${this.apiDoc.swagger}</span><br>
+          <b>UI: </b><span>Code Artist</span>`;
+        this.$Modal.info({
+          title: this.info.title,
+          content: content
+        });
+      },
+      init() {
+        const tags = this.apiDoc.tags;
+        let paths = this.apiDoc.paths;
+        for (let i = 0, n = tags.length; i < n; i++) {
+          let menu = [];
+          for (let path in paths) {
+            for (let methods in paths[path]) {
+              let method = paths[path][methods];
+              if (method.tags[0] === tags[i].name) {
+                method.url = path;
+                method.name = method.summary;
+                menu.push(method);
+              }
+            }
+          }
+          tags[i].paths = menu;
         }
+      },
+      select(name) {
+        console.log(name);
       }
+    },
+    mounted() {
+      this.getResources(project => {
+        this.getApiDoc(project);
+      });
     }
   }
 </script>
 
 <style scoped>
 
+  .layout-footer-center {
+    padding: 0;
+    width: 100%;
+    height: 30px;
+    color: #fff;
+    background: #515a6e;
+    text-align: center;
+    line-height: 30px;
+  }
 
 </style>
