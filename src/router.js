@@ -8,7 +8,8 @@ export default new Router({
     {
       path: '/', name: 'index', component: () => import('./components/index'), redirect: '/main',
       children: [
-        {path: '/main', name: 'main', component: () => import('./views/main')}
+        {path: '/main', name: 'main', component: () => import('./views/main')},
+        {path: '/api', name: 'api', component: () => import('./views/api')}
       ]
     }
   ]

@@ -7,23 +7,17 @@
       <Layout>
         <Sider :style="{overflow: 'auto'}" width="280">
           <Menu accordion theme="dark" width="auto" @on-select="select($event)">
-            <Submenu
-                    v-for="(tag,index) in apiDoc.tags"
-                    :name="index"
-            >
-              <template slot="title">
-                {{tag.name}}
-              </template>
-              <MenuItem
-                      v-for="menu in tag.paths"
-                      :name="menu.url">{{menu.name}}
+            <Submenu v-for="(tag,index) in apiDoc.tags" :name="index">
+              <template slot="title">{{tag.name}}</template>
+              <MenuItem v-for="menu in tag.paths" :style="{padding:'10px 30px'}" :name="menu.url">
+                {{menu.name}}
               </MenuItem>
             </Submenu>
           </Menu>
         </Sider>
         <Layout>
           <Content :style="{padding: '24px',height: '100%'}">
-            <Content :style="{padding: '24px', height:'100%', background: '#fff'}">
+            <Content :style="{height:'100%', background: '#fff'}">
               <router-view/>
             </Content>
           </Content>
@@ -54,6 +48,8 @@
         this.ajax.get('/v2/api-docs', {group: project}, data => {
           this.apiDoc = data;
           this.info = data.info;
+          sessionStorage.paths = JSON.stringify(data.paths);
+          sessionStorage.definitions = JSON.stringify(data.definitions);
           this.init();
         });
       },
@@ -88,7 +84,7 @@
         }
       },
       select(name) {
-        console.log(name);
+        this.$router.push({name: 'api', query: {path: name}});
       }
     },
     mounted() {
