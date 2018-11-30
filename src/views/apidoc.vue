@@ -21,7 +21,7 @@
     <table cellspacing="0" cellpadding="0" border="0">
       <tr>
         <td colspan="5" class="data-label">入口参数说明：<code>Content-Type: {{api.consumes.join(';')}}</code>
-          <a class="setting" @click="showTestFnc()">[测试]</a>
+          <a class="setting" @click="showTestFnc(api.parameters)">[测试]</a>
         </td>
       </tr>
       <tr class="data-head">
@@ -106,7 +106,20 @@
       </table>
     </Drawer>
     <Drawer title="测试" width="600" :closable="false" v-model="showTest">
-      todo
+      <Form ref="formTest" :model="formTest" :rules="formTestValid" :label-width="80">
+        <FormItem label="url">
+          <Input v-model="formTest.$url" disabled></Input>
+        </FormItem>
+        <FormItem v-for="param in paramTest" :label="param.name" :prop="param.name" :key="param.name">
+          <Input v-model="formTest[param.name]" type="textarea" v-if="param.in==='body'"
+                 placeholder="请输入JSON字符串..."></Input>
+          <Input v-model="formTest[param.name]" v-else :placeholder="'请输入'+param.description+'...'"></Input>
+        </FormItem>
+        <FormItem>
+          <Button type="primary" @click="handleSubmit('formTest')">提交</Button>
+          <Button style="margin-left: 8px" @click="handleReset('formTest')">重置</Button>
+        </FormItem>
+      </Form>
     </Drawer>
     <Drawer title="示例" width="600" :closable="false" v-model="showExample">
       todo
@@ -129,7 +142,12 @@
         showParamInfo: false,
         showTest: false,
         showExample: false,
-        paramInfo: {}
+        paramInfo: {},
+        paramTest: [],
+        formTest: {
+          $url: this.url
+        },
+        formTestValid: {}
       }
     },
     methods: {
@@ -165,7 +183,14 @@
         this.paramInfo = param;
         this.showParamInfo = true;
       },
-      showTestFnc: function () {
+      showTestFnc: function (params) {
+        params.map((param, i) => {
+          console.debug('url:', this.url);
+          this.formTestValid[param.name] = [{required: param.required, message: param.name + '不能为空', trigger: 'blur'}];
+          console.debug('param:', param);
+          console.debug('valid:', this.formTestValid);
+        });
+        this.paramTest = params;
         this.showTest = true;
       },
       showExampleFnc: function () {
@@ -188,6 +213,28 @@
           ref = val.$ref;
         }
         return this.definitions[this.getRefName(ref)].properties;
+      },
+      handleSubmit: function (name) {
+        this.$refs[name].validate((valid) => {
+          if (valid) {
+            let url = this.formTest.$url;
+            // path 参数使用正则替换url
+            let exec = url.match(/{(.*?)}/g);
+            if (exec) {
+              exec.map((e, i) => {
+                const p = e.replace(/{(.*)}/, '$1');
+                url = url.replace(e, this.formTest[p]);
+              });
+            }
+            this.formTest.$url = url;
+            console.debug('form:', this.formTest);
+            this.$Message.success('Success!');
+          }
+        });
+      },
+      handleReset: function (name) {
+        this.formTest = {};
+        this.$refs[name].resetFields();
       }
     },
     mounted() {
