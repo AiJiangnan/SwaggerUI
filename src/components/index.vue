@@ -7,9 +7,9 @@
       <Layout>
         <Sider :style="{overflow: 'auto'}" width="280">
           <Menu accordion theme="dark" width="auto" @on-select="select($event)">
-            <Submenu v-for="(tag,index) in apiDoc.tags" :name="index" :title="tag.description">
+            <Submenu v-for="(tag,index) in apiDoc.tags" :name="index" :title="tag.description" :key="index">
               <template slot="title">{{tag.name}}</template>
-              <MenuItem v-for="menu in tag.paths" :style="{padding:'10px 30px'}" :name="menu.url">
+              <MenuItem v-for="menu in tag.paths" :style="{padding:'10px 30px'}" :name="menu.url" :key="menu.url">
                 {{menu.name}}
               </MenuItem>
             </Submenu>

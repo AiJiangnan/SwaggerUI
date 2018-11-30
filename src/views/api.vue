@@ -1,7 +1,7 @@
 <template>
   <div>
     <Tabs type="card">
-      <TabPane :label="method.method.toUpperCase()" v-for="method in methods">
+      <TabPane :label="method.method.toUpperCase()" v-for="method in methods" :key="method.method">
         <Apidoc :url="url" :method="method.method.toUpperCase()" :api="method.api"></Apidoc>
       </TabPane>
     </Tabs>
