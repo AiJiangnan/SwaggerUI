@@ -7,7 +7,7 @@
       <Layout>
         <Sider :style="{overflow: 'auto'}" width="280">
           <Menu accordion theme="dark" width="auto" @on-select="select($event)">
-            <Submenu v-for="(tag,index) in apiDoc.tags" :name="index">
+            <Submenu v-for="(tag,index) in apiDoc.tags" :name="index" :title="tag.description">
               <template slot="title">{{tag.name}}</template>
               <MenuItem v-for="menu in tag.paths" :style="{padding:'10px 30px'}" :name="menu.url">
                 {{menu.name}}
@@ -17,7 +17,7 @@
         </Sider>
         <Layout>
           <Content :style="{padding: '24px',height: '100%'}">
-            <Content :style="{height:'100%', background: '#fff'}">
+            <Content :style="{background: '#fff'}">
               <router-view/>
             </Content>
           </Content>
@@ -73,7 +73,7 @@
           for (let path in paths) {
             for (let methods in paths[path]) {
               let method = paths[path][methods];
-              if (method.tags[0] === tags[i].name) {
+              if (method.tags.indexOf(tags[i].name) > -1) {
                 method.url = path;
                 method.name = method.summary;
                 menu.push(method);
