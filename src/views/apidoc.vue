@@ -17,9 +17,8 @@
         <td class="data-label">请求方式：</td>
         <td colspan="4"><code>{{method}}</code></td>
       </tr>
-      <tr>
-        <td colspan="5"></td>
-      </tr>
+    </table>
+    <table cellspacing="0" cellpadding="0" border="0">
       <tr>
         <td colspan="5" class="data-label">入口参数说明：<code>Content-Type: {{api.consumes.join(';')}}</code></td>
       </tr>
@@ -30,16 +29,31 @@
         <td class="data-head">是否必须</td>
         <td class="data-head">参数类型</td>
       </tr>
-      <tr v-for="param in api.parameters">
+      <tr v-for="param in api.parameters" v-if="param.type">
+        <td class="data-info">{{param.name}}</td>
+        <td class="data-info">{{param.type}}</td>
+        <td class="data-info">{{param.description}}</td>
+        <td class="data-info">{{param.required?'是':'否'}}</td>
+        <td class="data-info">{{param.in}}</td>
+      </tr>
+      <tbody v-else>
+      <tr>
         <td class="data-info">{{param.name}}</td>
         <td class="data-info">{{getDefinitionType(param)}}</td>
         <td class="data-info">{{param.description}}</td>
         <td class="data-info">{{param.required?'是':'否'}}</td>
         <td class="data-info">{{param.in}}</td>
       </tr>
-      <tr>
-        <td colspan="5"></td>
+      <tr v-for="(val,key) in getDefinitionReq(param)">
+        <td class="data-info" style="padding-left:30px;">{{key}}</td>
+        <td class="data-info">{{val.type}}</td>
+        <td class="data-info">{{val.description}}</td>
+        <td class="data-info">{{val.required?'是':'否'}}</td>
+        <td class="data-info"></td>
       </tr>
+      </tbody>
+    </table>
+    <table cellspacing="0" cellpadding="0" border="0">
       <tr>
         <td colspan="5" class="data-label">返回结果说明：<code>Content-Type: {{api.produces.join(';')}}</code></td>
       </tr>
@@ -65,9 +79,8 @@
         <td colspan="3" class="data-info">{{sVal.description}}</td>
       </tr>
       </tbody>
-      <tr>
-        <td colspan="5"></td>
-      </tr>
+    </table>
+    <table cellspacing="0" cellpadding="0" border="0">
       <tr>
         <td colspan="5" class="data-label">响应状态码：</td>
       </tr>
@@ -137,6 +150,24 @@
         } else {
           return this.definitions[this.getRefName(val.$ref)].properties;
         }
+      },
+      getDefinitionReq: function (val) {
+        if (val.type === 'array') {
+          let items = val.items;
+          if (items.type) {
+            return;
+          }
+          return this.definitions[this.getRefName(items.$ref)].properties;
+        } else {
+          let definition = this.definitions[this.getRefName(val.schema.$ref)];
+          console.log(definition);
+          const required = definition.required;
+          for (let k in definition.properties) {
+            definition.properties[k]['required'] = (required.indexOf(k) > -1);
+          }
+          console.log(definition.properties);
+          return definition.properties;
+        }
       }
     },
     mounted() {
@@ -153,6 +184,7 @@
 
   #data table {
     width: 21cm;
+    margin-bottom: 5px;
     border: 2px solid;
   }
 
@@ -168,6 +200,7 @@
   }
 
   .data-head {
+    min-width: 100px;
     font-weight: bold;
   }
 
