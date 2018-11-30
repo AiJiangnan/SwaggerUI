@@ -20,63 +20,53 @@
     </table>
     <table cellspacing="0" cellpadding="0" border="0">
       <tr>
-        <td colspan="5" class="data-label">入口参数说明：<code>Content-Type: {{api.consumes.join(';')}}</code></td>
+        <td colspan="5" class="data-label">入口参数说明：<code>Content-Type: {{api.consumes.join(';')}}</code>
+          <a class="setting" @click="showTestFnc()">[测试]</a>
+        </td>
       </tr>
-      <tr>
-        <td class="data-head">参数名称</td>
-        <td class="data-head">数据类型</td>
-        <td class="data-head">参数描述</td>
-        <td class="data-head">是否必须</td>
-        <td class="data-head">参数类型</td>
+      <tr class="data-head">
+        <td>参数名称</td>
+        <td>数据类型</td>
+        <td>参数描述</td>
+        <td>是否必须</td>
+        <td>参数类型</td>
       </tr>
-      <tr v-for="param in api.parameters" v-if="param.type">
-        <td class="data-info">{{param.name}}</td>
-        <td class="data-info">{{param.type}}</td>
-        <td class="data-info">{{param.description}}</td>
-        <td class="data-info">{{param.required?'是':'否'}}</td>
-        <td class="data-info">{{param.in}}</td>
+      <tr v-for="param in api.parameters" class="data-info">
+        <td>{{param.name}}</td>
+        <td v-if="param.type">{{param.type}}</td>
+        <td v-else><a @click="showParamInfoFnc(param.schema)">{{getSchemaType(param.schema)}}</a></td>
+        <td>{{param.description}}</td>
+        <td>{{param.required?'是':'否'}}</td>
+        <td>{{param.in}}</td>
       </tr>
-      <tbody v-else>
-      <tr>
-        <td class="data-info">{{param.name}}</td>
-        <td class="data-info">{{getDefinitionType(param)}}</td>
-        <td class="data-info">{{param.description}}</td>
-        <td class="data-info">{{param.required?'是':'否'}}</td>
-        <td class="data-info">{{param.in}}</td>
-      </tr>
-      <tr v-for="(val,key) in getDefinitionReq(param)">
-        <td class="data-info" style="padding-left:30px;">{{key}}</td>
-        <td class="data-info">{{val.type}}</td>
-        <td class="data-info">{{val.description}}</td>
-        <td class="data-info">{{val.required?'是':'否'}}</td>
-        <td class="data-info"></td>
-      </tr>
-      </tbody>
     </table>
     <table cellspacing="0" cellpadding="0" border="0">
       <tr>
-        <td colspan="5" class="data-label">返回结果说明：<code>Content-Type: {{api.produces.join(';')}}</code></td>
+        <td colspan="5" class="data-label">返回结果说明：<code>Content-Type: {{api.produces.join(';')}}</code>
+          <a class="setting" @click="showExampleFnc()">[示例]</a>
+        </td>
       </tr>
-      <tr>
-        <td class="data-head">参数名称</td>
-        <td class="data-head">数据类型</td>
-        <td colspan="3" class="data-head">参数描述</td>
+      <tr class="data-head">
+        <td>参数名称</td>
+        <td>数据类型</td>
+        <td colspan="3">参数描述</td>
       </tr>
-      <tr v-for="(val,key) in getDefinition(api.responses['200'])" v-if="val.type && val.type!=='array'">
-        <td class="data-info">{{key}}</td>
-        <td class="data-info">{{val.type}}</td>
-        <td colspan="3" class="data-info">{{val.description}}</td>
+      <tr class="data-info" v-for="(val,key) in getDefinition(api.responses['200'])"
+          v-if="val.type && val.type!=='array'">
+        <td>{{key}}</td>
+        <td>{{val.type}}</td>
+        <td colspan="3">{{val.description}}</td>
       </tr>
       <tbody v-else>
-      <tr>
-        <td class="data-info">{{key}}</td>
-        <td class="data-info">{{getSchemaType(val)}}</td>
-        <td colspan="3" class="data-info">{{val.description}}</td>
+      <tr class="data-info">
+        <td>{{key}}</td>
+        <td>{{getSchemaType(val)}}</td>
+        <td colspan="3">{{val.description}}</td>
       </tr>
-      <tr v-for="(sVal,sKey) in getDefinitionResp(val)">
-        <td class="data-info" style="padding-left:30px;">{{sKey}}</td>
-        <td class="data-info">{{sVal.type}}</td>
-        <td colspan="3" class="data-info">{{sVal.description}}</td>
+      <tr class="data-info" v-for="(sVal,sKey) in getDefinitionResp(val)">
+        <td style="padding-left:30px;">{{sKey}}</td>
+        <td>{{sVal.type}}</td>
+        <td colspan="3">{{sVal.description}}</td>
       </tr>
       </tbody>
     </table>
@@ -84,21 +74,43 @@
       <tr>
         <td colspan="5" class="data-label">响应状态码：</td>
       </tr>
-      <tr>
-        <td class="data-head">状态码</td>
-        <td class="data-head">描述</td>
-        <td class="data-head">响应类型</td>
-        <td class="data-head">响应内容</td>
-        <td class="data-head">响应头</td>
+      <tr class="data-head">
+        <td>状态码</td>
+        <td>描述</td>
+        <td>响应类型</td>
+        <td>响应内容</td>
+        <td>响应头</td>
       </tr>
-      <tr v-for="(val,key) in api.responses">
-        <td class="data-info">{{key}}</td>
-        <td class="data-info">{{val.description}}</td>
-        <td class="data-info">{{getDefinitionType(val)}}</td>
-        <td class="data-info"></td>
-        <td class="data-info"></td>
+      <tr class="data-info" v-for="(val,key) in api.responses">
+        <td>{{key}}</td>
+        <td>{{val.description}}</td>
+        <td>{{val.type || getSchemaType(val.schema)}}</td>
+        <td></td>
+        <td></td>
       </tr>
     </table>
+    <Drawer title="输入对象参数" width="600" :closable="false" v-model="showParamInfo">
+      <table cellspacing="0" cellpadding="0" border="0" class="info-table">
+        <tr class="data-head">
+          <td>参数名称</td>
+          <td>数据类型</td>
+          <td>参数描述</td>
+          <td>是否必须</td>
+        </tr>
+        <tr class="data-info" v-for="(val,key) in paramInfo.properties">
+          <td>{{key}}</td>
+          <td>{{val.type}}</td>
+          <td>{{val.description}}</td>
+          <td>{{val.required?'是':'否'}}</td>
+        </tr>
+      </table>
+    </Drawer>
+    <Drawer title="测试" width="600" :closable="false" v-model="showTest">
+      todo
+    </Drawer>
+    <Drawer title="示例" width="600" :closable="false" v-model="showExample">
+      todo
+    </Drawer>
   </div>
 </template>
 
@@ -113,7 +125,11 @@
     },
     data() {
       return {
-        definitions: JSON.parse(sessionStorage.definitions)
+        definitions: JSON.parse(sessionStorage.definitions),
+        showParamInfo: false,
+        showTest: false,
+        showExample: false,
+        paramInfo: {}
       }
     },
     methods: {
@@ -129,11 +145,31 @@
           return this.getRefName(schema.$ref);
         }
       },
-      getDefinitionType: function (param) {
-        if (param.type) {
-          return param.type;
+      showParamInfoFnc: function (schema) {
+        let ref = '';
+        if (schema.type === 'array') {
+          let items = schema.items;
+          if (items.type) {
+            this.paramInfo = {};
+            return;
+          }
+          ref = items.$ref;
+        } else {
+          ref = schema.$ref;
         }
-        return this.getSchemaType(param.schema);
+        let param = this.definitions[this.getRefName(ref)];
+        const required = param.required;
+        for (let k in param.properties) {
+          param.properties[k]['required'] = (required.indexOf(k) > -1);
+        }
+        this.paramInfo = param;
+        this.showParamInfo = true;
+      },
+      showTestFnc: function () {
+        this.showTest = true;
+      },
+      showExampleFnc: function () {
+        this.showExample = true;
       },
       getDefinition: function (param) {
         const ref = this.getRefName(param.schema.$ref);
@@ -141,33 +177,17 @@
         return definition.properties;
       },
       getDefinitionResp: function (val) {
+        let ref = '';
         if (val.type === 'array') {
           let items = val.items;
           if (items.type) {
             return;
           }
-          return this.definitions[this.getRefName(items.$ref)].properties;
+          ref = items.$ref;
         } else {
-          return this.definitions[this.getRefName(val.$ref)].properties;
+          ref = val.$ref;
         }
-      },
-      getDefinitionReq: function (val) {
-        if (val.type === 'array') {
-          let items = val.items;
-          if (items.type) {
-            return;
-          }
-          return this.definitions[this.getRefName(items.$ref)].properties;
-        } else {
-          let definition = this.definitions[this.getRefName(val.schema.$ref)];
-          console.log(definition);
-          const required = definition.required;
-          for (let k in definition.properties) {
-            definition.properties[k]['required'] = (required.indexOf(k) > -1);
-          }
-          console.log(definition.properties);
-          return definition.properties;
-        }
+        return this.definitions[this.getRefName(ref)].properties;
       }
     },
     mounted() {
@@ -188,7 +208,7 @@
     border: 2px solid;
   }
 
-  #data td {
+  #data td, .info-table td {
     padding: 8px;
     border: 1px solid;
   }
@@ -200,12 +220,16 @@
   }
 
   .data-head {
-    min-width: 100px;
     font-weight: bold;
+    text-align: center;
   }
 
-  .data-head {
-    text-align: center;
+  .data-head td {
+    min-width: 100px;
+  }
+
+  .setting {
+    float: right;
   }
 
 </style>
