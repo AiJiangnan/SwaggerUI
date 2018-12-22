@@ -24,6 +24,7 @@
     </Layout>
   </div>
 </template>
+
 <script>
   import ApiMenu from "../components/ApiMenu";
   import About from "../components/About";
