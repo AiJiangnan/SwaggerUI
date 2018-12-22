@@ -186,14 +186,11 @@
       showTestFnc: function (params) {
         if (params) {
           params.map((param, i) => {
-            console.debug('url:', this.url);
             this.formTestValid[param.name] = [{
               required: param.required,
               message: param.name + '不能为空',
               trigger: 'blur'
             }];
-            console.debug('param:', param);
-            console.debug('valid:', this.formTestValid);
           });
         }
         this.paramTest = params;
@@ -233,7 +230,6 @@
               });
             }
             this.formTest.$url = url;
-            console.debug('form:', this.formTest);
             this.$Message.success('Success!');
           }
         });
@@ -247,7 +243,6 @@
       }
     },
     mounted() {
-      console.log(this.api);
     }
   }
 </script>

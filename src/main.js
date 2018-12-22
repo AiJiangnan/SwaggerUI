@@ -1,6 +1,6 @@
-import Vue from 'vue'
-import App from './App.vue'
-import router from './router'
+import Vue from 'vue';
+import App from './App.vue';
+import router from './router';
 import iView from 'iview';
 import Ajax from './assets/js/ajax'
 import 'iview/dist/styles/iview.css';

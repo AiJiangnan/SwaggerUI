@@ -1,8 +1,8 @@
 <template>
   <div>
     <Tabs type="card">
-      <TabPane :label="method.method.toUpperCase()" v-for="method in methods" :key="method.method">
-        <ApiDoc :url="url" :method="method.method.toUpperCase()" :api="method.api"></ApiDoc>
+      <TabPane v-for="(m,i) in methods" :label="m.method.toUpperCase()" :key="i">
+        <ApiDoc :url="url" :method="m.method.toUpperCase()" :api="m.api"></ApiDoc>
       </TabPane>
     </Tabs>
   </div>
@@ -16,14 +16,13 @@
     data() {
       return {
         url: this.$route.query.path,
-        paths: JSON.parse(sessionStorage.paths),
         methods: []
       }
     },
     methods: {
-      init() {
+      parseApiMethod() {
         let m = [];
-        let methods = this.paths[this.url];
+        const methods = JSON.parse(sessionStorage.path);
         for (let method in methods) {
           let ele = {};
           ele.method = method;
@@ -34,17 +33,13 @@
       }
     },
     mounted() {
-      this.init();
+      this.parseApiMethod();
     },
     watch: {
       '$route'(to) {
         this.url = to.query.path;
-        this.init();
+        this.parseApiMethod();
       }
     }
   }
 </script>
-
-<style scoped>
-
-</style>

@@ -2,16 +2,15 @@
   <div class="layout">
     <Layout :style="{height:'100vh'}">
       <Header>
-        <h2 style="color:#fff;text-align:left;display:inline-block;" @click="alertInfo">{{resource.label}} <sup>{{info.version}}</sup>
-        </h2>
-        <Select v-model="selectResource" style="width:200px;float:right;padding:15px 0;" label-in-value
-                @on-change="changeResource($event)">
-          <Option v-for="item in resources" :value="item.location" :key="item.location">{{item.name}}</Option>
+        <h2 @click="about.show=true">{{resource.label}} <sup>{{apiDoc.info.version || ''}}</sup></h2>
+        <About :show="about.show" :content="about" @click="about.show=false"/>
+        <Select class="select" v-model="selectResource" label-in-value @on-change="changeResource($event)">
+          <Option v-for="(item,index) in resources" :value="item.location" :key="index">{{item.name}}</Option>
         </Select>
       </Header>
       <Layout>
         <Sider :style="{overflow: 'auto'}" width="280">
-          <ApiMenu/>
+          <ApiMenu :menus="apiMenu" :paths="apiDoc.paths"/>
         </Sider>
         <Layout>
           <Content :style="{padding: '24px',height: '100%'}">
@@ -21,30 +20,32 @@
           </Content>
         </Layout>
       </Layout>
-      <Footer class="layout-footer-center">2017-2019 &copy; CodeArtist</Footer>
+      <Footer class="layout-footer-center">2017-{{new Date().getFullYear()}} &copy; CodeArtist</Footer>
     </Layout>
   </div>
 </template>
 <script>
   import ApiMenu from "../components/ApiMenu";
+  import About from "../components/About";
 
   export default {
-    components: {ApiMenu},
+    components: {About, ApiMenu},
     data() {
       return {
         resources: [],
         resource: {},
         selectResource: '',
-
-        apiDoc: {},
-        apiTags: [],
-        info: {}
+        apiDoc: {
+          info: {}
+        },
+        apiMenu: [],
+        about: {show: false}
       }
     },
     methods: {
       changeResource(value) {
         this.resource = value;
-        console.log('resource:', this.resource);
+        this.getApiDoc();
       },
       getResources(callback) {
         this.ajax.get('/swagger-resources', data => {
@@ -56,46 +57,45 @@
         });
       },
       getApiDoc() {
-        this.ajax.get('/v2/api-docs', {group: this.resource.label}, data => {
+        this.ajax.get(this.selectResource, {group: this.resource.label}, data => {
           this.apiDoc = data;
-          this.info = data.info;
-          sessionStorage.paths = JSON.stringify(data.paths);
           sessionStorage.definitions = JSON.stringify(data.definitions);
-          this.init();
+          this.parseAbout();
+          this.parseApiMenu();
         });
       },
-      alertInfo() {
-        const content = `
-          <b>主机: </b><span>${this.apiDoc.host}</span><br>
-          <b>版本: </b><span>${this.info.version}</span><br>
-          <b>描述: </b><span>${this.info.description}</span><br>
-          <b>Swagger: </b><span>${this.apiDoc.swagger}</span><br>
-          <b>UI: </b><span>Code Artist</span>`;
-        this.$Modal.info({
-          title: this.info.title,
-          content: content
-        });
+      parseAbout() {
+        let [about, apiDoc] = [this.about, this.apiDoc];
+        about.title = apiDoc.info.title;
+        about.host = apiDoc.host;
+        about.version = apiDoc.info.version;
+        about.description = apiDoc.info.description;
+        about.swagger = apiDoc.swagger;
       },
-      init() {
-        const tags = this.apiDoc.tags;
-        let paths = this.apiDoc.paths;
+      parseApiMenu() {
+        const [tags, paths] = [this.apiDoc.tags, this.apiDoc.paths];
+        let menusArr = this.apiMenu;
         for (let i = 0, n = tags.length; i < n; i++) {
-          let menu = [];
+          let menus = {};
+          menus.name = tags[i].name;
+          menus.description = tags[i].description;
+          let smArr = [];
           for (let path in paths) {
             for (let methods in paths[path]) {
-              let method = paths[path][methods];
+              const method = paths[path][methods];
               if (method.tags.indexOf(tags[i].name) > -1) {
-                method.url = path;
-                method.name = method.summary;
-                menu.push(method);
+                let sm = {};
+                sm.name = method.summary;
+                sm.description = path;
+                sm.url = path;
+                smArr.push(sm);
+                break;
               }
             }
           }
-          tags[i].paths = menu;
+          menus.menus = smArr;
+          menusArr.push(menus);
         }
-      },
-      select(name) {
-        this.$router.push({name: 'api', query: {path: name}});
       }
     },
     mounted() {
@@ -105,6 +105,18 @@
 </script>
 
 <style scoped>
+
+  h2 {
+    color: #fff;
+    text-align: left;
+    display: inline-block;
+  }
+
+  .select {
+    width: 200px;
+    float: right;
+    padding: 15px 0;
+  }
 
   .layout-footer-center {
     padding: 0;
