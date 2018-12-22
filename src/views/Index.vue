@@ -2,18 +2,16 @@
   <div class="layout">
     <Layout :style="{height:'100vh'}">
       <Header>
-        <h2 style="color:#fff;text-align:left;" @click="alertInfo">{{project}} <sup>{{info.version}}</sup></h2>
+        <h2 style="color:#fff;text-align:left;display:inline-block;" @click="alertInfo">{{resource.label}} <sup>{{info.version}}</sup>
+        </h2>
+        <Select v-model="selectResource" style="width:200px;float:right;padding:15px 0;" label-in-value
+                @on-change="changeResource($event)">
+          <Option v-for="item in resources" :value="item.location" :key="item.location">{{item.name}}</Option>
+        </Select>
       </Header>
       <Layout>
         <Sider :style="{overflow: 'auto'}" width="280">
-          <Menu accordion theme="dark" width="auto" @on-select="select($event)">
-            <Submenu v-for="(tag,index) in apiDoc.tags" :name="index" :title="tag.description" :key="index">
-              <template slot="title">{{tag.name}}</template>
-              <MenuItem v-for="menu in tag.paths" :style="{padding:'10px 30px'}" :name="menu.url" :key="menu.url">
-                {{menu.name}}
-              </MenuItem>
-            </Submenu>
-          </Menu>
+          <ApiMenu/>
         </Sider>
         <Layout>
           <Content :style="{padding: '24px',height: '100%'}">
@@ -23,29 +21,42 @@
           </Content>
         </Layout>
       </Layout>
-      <Footer class="layout-footer-center">2017-2018 &copy; CodeArtist</Footer>
+      <Footer class="layout-footer-center">2017-2019 &copy; CodeArtist</Footer>
     </Layout>
   </div>
 </template>
 <script>
+  import ApiMenu from "../components/ApiMenu";
+
   export default {
+    components: {ApiMenu},
     data() {
       return {
-        project: '',
+        resources: [],
+        resource: {},
+        selectResource: '',
+
         apiDoc: {},
         apiTags: [],
         info: {}
       }
     },
     methods: {
+      changeResource(value) {
+        this.resource = value;
+        console.log('resource:', this.resource);
+      },
       getResources(callback) {
         this.ajax.get('/swagger-resources', data => {
-          this.project = data[0].name;
-          callback(data[0].name);
+          this.resources = data;
+          this.resource.label = data[0].name;
+          this.resource.value = data[0].location;
+          this.selectResource = data[0].location;
+          callback();
         });
       },
-      getApiDoc(project) {
-        this.ajax.get('/v2/api-docs', {group: project}, data => {
+      getApiDoc() {
+        this.ajax.get('/v2/api-docs', {group: this.resource.label}, data => {
           this.apiDoc = data;
           this.info = data.info;
           sessionStorage.paths = JSON.stringify(data.paths);
@@ -88,9 +99,7 @@
       }
     },
     mounted() {
-      this.getResources(project => {
-        this.getApiDoc(project);
-      });
+      this.getResources(() => this.getApiDoc());
     }
   }
 </script>

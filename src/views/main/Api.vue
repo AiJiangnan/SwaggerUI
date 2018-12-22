@@ -2,17 +2,17 @@
   <div>
     <Tabs type="card">
       <TabPane :label="method.method.toUpperCase()" v-for="method in methods" :key="method.method">
-        <Apidoc :url="url" :method="method.method.toUpperCase()" :api="method.api"></Apidoc>
+        <ApiDoc :url="url" :method="method.method.toUpperCase()" :api="method.api"></ApiDoc>
       </TabPane>
     </Tabs>
   </div>
 </template>
 
 <script>
-  import Apidoc from "./apidoc";
+  import ApiDoc from "../../components/ApiDoc";
 
   export default {
-    components: {Apidoc},
+    components: {ApiDoc: ApiDoc},
     data() {
       return {
         url: this.$route.query.path,

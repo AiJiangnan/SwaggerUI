@@ -130,7 +130,7 @@
 <script>
 
   export default {
-    name: "apidoc",
+    name: "ApiDoc",
     props: {
       url: {type: String, default: ''},
       method: {type: String, default: ''},
@@ -184,12 +184,18 @@
         this.showParamInfo = true;
       },
       showTestFnc: function (params) {
-        params.map((param, i) => {
-          console.debug('url:', this.url);
-          this.formTestValid[param.name] = [{required: param.required, message: param.name + '不能为空', trigger: 'blur'}];
-          console.debug('param:', param);
-          console.debug('valid:', this.formTestValid);
-        });
+        if (params) {
+          params.map((param, i) => {
+            console.debug('url:', this.url);
+            this.formTestValid[param.name] = [{
+              required: param.required,
+              message: param.name + '不能为空',
+              trigger: 'blur'
+            }];
+            console.debug('param:', param);
+            console.debug('valid:', this.formTestValid);
+          });
+        }
         this.paramTest = params;
         this.showTest = true;
       },
@@ -231,6 +237,9 @@
             this.$Message.success('Success!');
           }
         });
+        if (!this.api.parameters) {
+          this.$Message.success('Success!');
+        }
       },
       handleReset: function (name) {
         this.formTest = {};
