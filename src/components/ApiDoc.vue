@@ -3,24 +3,25 @@
     <table>
       <tr>
         <td class="data-label">接口分类：</td>
-        <td colspan="4">{{api.tags.join()}}</td>
+        <td>{{api.tags.join()}}</td>
       </tr>
       <tr>
         <td class="data-label">接口名称：</td>
-        <td colspan="4">{{api.summary}}</td>
+        <td>{{api.summary}}</td>
       </tr>
       <tr>
         <td class="data-label">请求地址：</td>
-        <td colspan="4"><code>{{url}}</code></td>
+        <td><code>{{url}}</code></td>
       </tr>
       <tr>
         <td class="data-label">请求方式：</td>
-        <td colspan="4"><code>{{method.toUpperCase()}}</code></td>
+        <td><code>{{method.toUpperCase()}}</code></td>
       </tr>
     </table>
     <table>
       <tr>
-        <td colspan="5" class="data-label">入口参数说明：<code>Content-Type: {{api.consumes.join(';')}}</code>
+        <td colspan="5" class="data-label">入口参数说明：<code v-if="api.consumes">Content-Type:
+          {{api.consumes.join(';')}}</code>
           <a class="setting" @click="showTestFnc(api.parameters)">[测试]</a>
         </td>
       </tr>
@@ -31,42 +32,43 @@
         <td>是否必须</td>
         <td>参数类型</td>
       </tr>
-      <tr v-for="param in api.parameters" class="data-info">
+      <tr v-for="param in api.parameters" class="data-info" v-if="param.type">
         <td>{{param.name}}</td>
-        <td v-if="param.type">{{param.type}}</td>
-        <td v-else><a @click="showParamInfoFnc(param.schema)">{{getSchemaType(param.schema)}}</a></td>
+        <td>{{param.type}}</td>
         <td>{{param.description}}</td>
         <td>{{param.required?'是':'否'}}</td>
         <td>{{param.in}}</td>
       </tr>
+      <ParamTree v-else :param="param" :type="getTypeName(param.schema)"/>
     </table>
     <table>
       <tr>
-        <td colspan="5" class="data-label">返回结果说明：<code>Content-Type: {{api.produces.join(';')}}</code>
+        <td colspan="3" class="data-label">返回结果说明：<code v-if="api.produces">Content-Type:
+          {{api.produces.join(';')}}</code>
           <a class="setting" @click="showExampleFnc()">[示例]</a>
         </td>
       </tr>
       <tr class="data-head">
         <td>参数名称</td>
         <td>数据类型</td>
-        <td colspan="3">参数描述</td>
+        <td>参数描述</td>
       </tr>
       <tr class="data-info" v-for="(val,key) in getDefinition(api.responses['200'])"
           v-if="val.type && val.type!=='array'">
         <td>{{key}}</td>
         <td>{{val.type}}</td>
-        <td colspan="3">{{val.description}}</td>
+        <td>{{val.description}}</td>
       </tr>
       <tbody v-else>
       <tr class="data-info">
         <td>{{key}}</td>
         <td>{{getSchemaType(val)}}</td>
-        <td colspan="3">{{val.description}}</td>
+        <td>{{val.description}}</td>
       </tr>
       <tr class="data-info" v-for="(sVal,sKey) in getDefinitionResp(val)">
         <td style="padding-left:30px;">{{sKey}}</td>
         <td>{{sVal.type}}</td>
-        <td colspan="3">{{sVal.description}}</td>
+        <td>{{sVal.description}}</td>
       </tr>
       </tbody>
     </table>
@@ -84,7 +86,7 @@
       <tr class="data-info" v-for="(val,key) in api.responses">
         <td>{{key}}</td>
         <td>{{val.description}}</td>
-        <td>{{val.type || getSchemaType(val.schema)}}</td>
+        <td>{{getTypeName(val.schema)}}</td>
         <td></td>
         <td></td>
       </tr>
@@ -128,8 +130,11 @@
 </template>
 
 <script>
+  import ParamTree from "./ParamTree";
+
   export default {
     name: "ApiDoc",
+    components: {ParamTree},
     props: {
       url: {type: String, default: ''},
       method: {type: String, default: ''},
@@ -153,10 +158,11 @@
       getRefName(ref) {
         return ref.replace('#/definitions/', '');
       },
-      getType(schema) {
-        console.log('schema:', schema);
-        return schema.type ? schema : this.getRefName(schema.$ref);
+      getTypeName(schema) {
+        if (!schema) return;
+        return schema.type || this.getRefName(schema.$ref);
       },
+
       getSchemaType(schema) {
         if (!schema) return;
         if (schema.type === 'array') {
@@ -244,13 +250,11 @@
         this.formTest = {};
         this.$refs[name].resetFields();
       }
-    },
-    mounted() {
     }
   }
 </script>
 
-<style scoped>
+<style>
 
   #data {
     padding: 20px;
