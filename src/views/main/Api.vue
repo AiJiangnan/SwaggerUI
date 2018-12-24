@@ -2,7 +2,7 @@
   <div>
     <Tabs type="card">
       <TabPane v-for="(m,i) in methods" :label="m.method.toUpperCase()" :key="i">
-        <ApiDoc :url="url" :method="m.method.toUpperCase()" :api="m.api"></ApiDoc>
+        <ApiDoc :url="url" :method="m.method" :api="m.api"/>
       </TabPane>
     </Tabs>
   </div>

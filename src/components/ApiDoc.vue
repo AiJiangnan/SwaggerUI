@@ -1,6 +1,6 @@
 <template>
   <div id="data">
-    <table cellspacing="0" cellpadding="0" border="0">
+    <table>
       <tr>
         <td class="data-label">接口分类：</td>
         <td colspan="4">{{api.tags.join()}}</td>
@@ -15,10 +15,10 @@
       </tr>
       <tr>
         <td class="data-label">请求方式：</td>
-        <td colspan="4"><code>{{method}}</code></td>
+        <td colspan="4"><code>{{method.toUpperCase()}}</code></td>
       </tr>
     </table>
-    <table cellspacing="0" cellpadding="0" border="0">
+    <table>
       <tr>
         <td colspan="5" class="data-label">入口参数说明：<code>Content-Type: {{api.consumes.join(';')}}</code>
           <a class="setting" @click="showTestFnc(api.parameters)">[测试]</a>
@@ -40,7 +40,7 @@
         <td>{{param.in}}</td>
       </tr>
     </table>
-    <table cellspacing="0" cellpadding="0" border="0">
+    <table>
       <tr>
         <td colspan="5" class="data-label">返回结果说明：<code>Content-Type: {{api.produces.join(';')}}</code>
           <a class="setting" @click="showExampleFnc()">[示例]</a>
@@ -70,7 +70,7 @@
       </tr>
       </tbody>
     </table>
-    <table cellspacing="0" cellpadding="0" border="0">
+    <table>
       <tr>
         <td colspan="5" class="data-label">响应状态码：</td>
       </tr>
@@ -90,7 +90,7 @@
       </tr>
     </table>
     <Drawer title="输入对象参数" width="600" :closable="false" v-model="showParamInfo">
-      <table cellspacing="0" cellpadding="0" border="0" class="info-table">
+      <table class="info-table">
         <tr class="data-head">
           <td>参数名称</td>
           <td>数据类型</td>
@@ -128,7 +128,6 @@
 </template>
 
 <script>
-
   export default {
     name: "ApiDoc",
     props: {
@@ -151,19 +150,23 @@
       }
     },
     methods: {
-      getRefName: function (ref) {
+      getRefName(ref) {
         return ref.replace('#/definitions/', '');
       },
-      getSchemaType: function (schema) {
+      getType(schema) {
+        console.log('schema:', schema);
+        return schema.type ? schema : this.getRefName(schema.$ref);
+      },
+      getSchemaType(schema) {
         if (!schema) return;
         if (schema.type === 'array') {
-          let items = schema.items;
-          return 'List<' + (items.type ? items.type : this.getRefName(items.$ref)) + '>';
+          const items = schema.items;
+          return 'Array«' + (items.type ? items.type : this.getRefName(items.$ref)) + '»';
         } else {
           return this.getRefName(schema.$ref);
         }
       },
-      showParamInfoFnc: function (schema) {
+      showParamInfoFnc(schema) {
         let ref = '';
         if (schema.type === 'array') {
           let items = schema.items;
@@ -183,7 +186,7 @@
         this.paramInfo = param;
         this.showParamInfo = true;
       },
-      showTestFnc: function (params) {
+      showTestFnc(params) {
         if (params) {
           params.map((param, i) => {
             this.formTestValid[param.name] = [{
@@ -196,15 +199,15 @@
         this.paramTest = params;
         this.showTest = true;
       },
-      showExampleFnc: function () {
+      showExampleFnc() {
         this.showExample = true;
       },
-      getDefinition: function (param) {
+      getDefinition(param) {
         const ref = this.getRefName(param.schema.$ref);
         const definition = this.definitions[ref];
         return definition.properties;
       },
-      getDefinitionResp: function (val) {
+      getDefinitionResp(val) {
         let ref = '';
         if (val.type === 'array') {
           let items = val.items;
@@ -217,7 +220,7 @@
         }
         return this.definitions[this.getRefName(ref)].properties;
       },
-      handleSubmit: function (name) {
+      handleSubmit(name) {
         this.$refs[name].validate((valid) => {
           if (valid) {
             let url = this.formTest.$url;
@@ -257,6 +260,8 @@
     width: 21cm;
     margin-bottom: 5px;
     border: 2px solid;
+    border-spacing: 0;
+    border-collapse: collapse;
   }
 
   #data td, .info-table td {

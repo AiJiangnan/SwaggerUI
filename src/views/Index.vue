@@ -58,7 +58,7 @@
         });
       },
       getApiDoc() {
-        this.ajax.get(this.selectResource, {group: this.resource.label}, data => {
+        this.ajax.get(this.selectResource, data => {
           this.apiDoc = data;
           sessionStorage.definitions = JSON.stringify(data.definitions);
           this.parseAbout();
