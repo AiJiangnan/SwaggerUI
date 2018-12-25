@@ -41,9 +41,9 @@
       </tr>
       <ParamTree v-else :param="param" :type="getType(param.schema)"/>
     </table>
-    <!--<table>
+    <table>
       <tr>
-        <td colspan="3" class="data-label">返回结果说明：<code v-if="api.produces">Content-Type:
+        <td colspan="4" class="data-label">返回结果说明：<code v-if="api.produces">Content-Type:
           {{api.produces.join(';')}}</code>
           <a class="setting" @click="showExampleFnc()">[示例]</a>
         </td>
@@ -51,27 +51,17 @@
       <tr class="data-head">
         <td>参数名称</td>
         <td>数据类型</td>
+        <td>父级字段</td>
         <td>参数描述</td>
       </tr>
-      <tr class="data-info" v-for="(val,key) in getDefinition(api.responses['200'])"
-          v-if="val.type && val.type!=='array'">
-        <td>{{key}}</td>
-        <td>{{val.type}}</td>
-        <td>{{val.description}}</td>
+      <tr class="data-info" v-for="field in getResp()">
+        <td>{{field.name}}</td>
+        <td>{{getType(field).desc}}</td>
+        <td>无</td>
+        <td>{{field.description}}</td>
       </tr>
-      <tbody v-else>
-      <tr class="data-info">
-        <td>{{key}}</td>
-        <td>{{getSchemaType(val)}}</td>
-        <td>{{val.description}}</td>
-      </tr>
-      <tr class="data-info" v-for="(sVal,sKey) in getDefinitionResp(val)">
-        <td style="padding-left:30px;">{{sKey}}</td>
-        <td>{{sVal.type}}</td>
-        <td>{{sVal.description}}</td>
-      </tr>
-      </tbody>
-    </table>-->
+      <RespTree :resp="getResp()"/>
+    </table>
     <table>
       <tr>
         <td colspan="5" class="data-label">响应状态码：</td>
@@ -131,10 +121,11 @@
 
 <script>
   import ParamTree from "./ParamTree";
+  import RespTree from "./RespTree";
 
   export default {
     name: "ApiDoc",
-    components: {ParamTree},
+    components: {RespTree, ParamTree},
     props: {
       url: {type: String, default: ''},
       method: {type: String, default: ''},
@@ -143,6 +134,7 @@
     data() {
       return {
         definitions: JSON.parse(sessionStorage.definitions),
+
         showParamInfo: false,
         showTest: false,
         showExample: false,
@@ -165,42 +157,33 @@
           const ref = schema.items.$ref;
           result.name = this.getRefName(ref);
           result.desc = 'Array<' + this.getRefName(ref) + '>';
+        } else if (schema.type) {
+          result.name = schema.type;
+          result.desc = schema.type;
         } else {
           result.name = this.getRefName(schema.$ref);
           result.desc = result.name;
         }
         return result;
       },
-
-      getSchemaType(schema) {
-        if (!schema) return;
-        if (schema.type === 'array') {
-          const items = schema.items;
-          return 'Array«' + (items.type ? items.type : this.getRefName(items.$ref)) + '»';
-        } else {
-          return this.getRefName(schema.$ref);
+      getResp() {
+        const resp = this.api.responses['200'];
+        if (resp.schema.type) {
+          return [];
         }
-      },
-      showParamInfoFnc(schema) {
-        let ref = '';
-        if (schema.type === 'array') {
-          let items = schema.items;
-          if (items.type) {
-            this.paramInfo = {};
-            return;
+        const definition = this.definitions[this.getRefName(resp.schema.$ref)];
+        if (definition.type === 'object') {
+          let respArr = [];
+          for (let k in definition.properties) {
+            let res = definition.properties[k];
+            res.name = k;
+            respArr.push(res);
           }
-          ref = items.$ref;
-        } else {
-          ref = schema.$ref;
+          return respArr;
         }
-        let param = this.definitions[this.getRefName(ref)];
-        const required = param.required;
-        for (let k in param.properties) {
-          param.properties[k]['required'] = (required.indexOf(k) > -1);
-        }
-        this.paramInfo = param;
-        this.showParamInfo = true;
+        return [];
       },
+
       showTestFnc(params) {
         if (params) {
           params.map((param, i) => {
@@ -216,24 +199,6 @@
       },
       showExampleFnc() {
         this.showExample = true;
-      },
-      getDefinition(param) {
-        const ref = this.getRefName(param.schema.$ref);
-        const definition = this.definitions[ref];
-        return definition.properties;
-      },
-      getDefinitionResp(val) {
-        let ref = '';
-        if (val.type === 'array') {
-          let items = val.items;
-          if (items.type) {
-            return;
-          }
-          ref = items.$ref;
-        } else {
-          ref = val.$ref;
-        }
-        return this.definitions[this.getRefName(ref)].properties;
       },
       handleSubmit(name) {
         this.$refs[name].validate((valid) => {
@@ -255,7 +220,7 @@
           this.$Message.success('Success!');
         }
       },
-      handleReset: function (name) {
+      handleReset(name) {
         this.formTest = {};
         this.$refs[name].resetFields();
       }

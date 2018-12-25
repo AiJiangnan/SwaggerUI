@@ -2,7 +2,7 @@
   <tbody>
   <tr class="data-info">
     <td>
-      <Icon :type="show?'ios-arrow-down':'ios-arrow-forward'" style="cursor:pointer;" @click="expandTable"
+      <Icon :type="show?'ios-arrow-down':'ios-arrow-forward'" style="cursor:pointer;" @click="show=!show"
             v-if="!isBaseType"/>
       {{param.name}}
     </td>
@@ -47,9 +47,6 @@
           return definition.properties;
         }
         return definition;
-      },
-      expandTable() {
-        this.show = !this.show;
       }
     },
     created() {
