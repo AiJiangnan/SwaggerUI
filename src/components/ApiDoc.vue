@@ -164,7 +164,7 @@
           let respArr = [];
           let refs = [];
           for (let k in def.properties) {
-            let res = def.properties[k];
+            let res = Object.assign({}, def.properties[k]);
             res.name = k;
             res.parent = param.parent;
             if (res.$ref) {
