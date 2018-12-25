@@ -39,9 +39,9 @@
         <td>{{param.required?'是':'否'}}</td>
         <td>{{param.in}}</td>
       </tr>
-      <ParamTree v-else :param="param" :type="getTypeName(param.schema)"/>
+      <ParamTree v-else :param="param" :type="getType(param.schema)"/>
     </table>
-    <table>
+    <!--<table>
       <tr>
         <td colspan="3" class="data-label">返回结果说明：<code v-if="api.produces">Content-Type:
           {{api.produces.join(';')}}</code>
@@ -71,7 +71,7 @@
         <td>{{sVal.description}}</td>
       </tr>
       </tbody>
-    </table>
+    </table>-->
     <table>
       <tr>
         <td colspan="5" class="data-label">响应状态码：</td>
@@ -86,7 +86,7 @@
       <tr class="data-info" v-for="(val,key) in api.responses">
         <td>{{key}}</td>
         <td>{{val.description}}</td>
-        <td>{{getTypeName(val.schema)}}</td>
+        <td>{{getType(val.schema).desc}}</td>
         <td></td>
         <td></td>
       </tr>
@@ -158,9 +158,18 @@
       getRefName(ref) {
         return ref.replace('#/definitions/', '');
       },
-      getTypeName(schema) {
-        if (!schema) return;
-        return schema.type || this.getRefName(schema.$ref);
+      getType(schema) {
+        let result = {name: '', desc: ''};
+        if (!schema) return result;
+        if (schema.type === 'array') {
+          const ref = schema.items.$ref;
+          result.name = this.getRefName(ref);
+          result.desc = 'Array<' + this.getRefName(ref) + '>';
+        } else {
+          result.name = this.getRefName(schema.$ref);
+          result.desc = result.name;
+        }
+        return result;
       },
 
       getSchemaType(schema) {

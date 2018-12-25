@@ -5,7 +5,7 @@
       <Icon :type="show?'ios-arrow-down':'ios-arrow-forward'" style="cursor:pointer;" @click="expandTable"/>
       {{param.name}}
     </td>
-    <td>{{type}}</td>
+    <td>{{type.desc}}</td>
     <td>{{param.description}}</td>
     <td>{{param.required?'是':'否'}}</td>
     <td>{{param.in}}</td>
@@ -30,21 +30,20 @@
       }
     },
     props: {
-      type: {type: String, default: ''},
+      type: {type: Object, default: null},
       param: {type: Object, default: null}
     },
     methods: {
       getObject() {
-        const definition = this.definitions[this.type];
+        const definition = this.definitions[this.type.name];
         if (definition.type === 'object') {
           return definition.properties;
         }
-        console.log('definitions:', definition);
         return definition;
       },
       expandTable() {
         this.show = !this.show;
-      },
+      }
     }
   }
 </script>
