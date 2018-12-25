@@ -2,7 +2,8 @@
   <tbody>
   <tr class="data-info">
     <td>
-      <Icon :type="show?'ios-arrow-down':'ios-arrow-forward'" style="cursor:pointer;" @click="expandTable"/>
+      <Icon :type="show?'ios-arrow-down':'ios-arrow-forward'" style="cursor:pointer;" @click="expandTable"
+            v-if="!isBaseType"/>
       {{param.name}}
     </td>
     <td>{{type.desc}}</td>
@@ -21,12 +22,15 @@
 </template>
 
 <script>
+  const baseType = ['Byte', 'Short', 'Integer', 'Long', 'Float', 'Double', 'String', 'Character', 'Boolean'];
+
   export default {
     name: "ParamTree",
     data() {
       return {
         definitions: JSON.parse(sessionStorage.definitions),
-        show: false
+        show: false,
+        isBaseType: false
       }
     },
     props: {
@@ -35,6 +39,9 @@
     },
     methods: {
       getObject() {
+        if (this.isBaseType) {
+          return;
+        }
         const definition = this.definitions[this.type.name];
         if (definition.type === 'object') {
           return definition.properties;
@@ -44,6 +51,9 @@
       expandTable() {
         this.show = !this.show;
       }
+    },
+    created() {
+      this.isBaseType = baseType.indexOf(this.type.name) > -1;
     }
   }
 </script>
