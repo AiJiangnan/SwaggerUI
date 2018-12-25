@@ -22,13 +22,14 @@
 </template>
 
 <script>
+  import Parse from "../assets/js/parse";
+
   const baseType = ['Byte', 'Short', 'Integer', 'Long', 'Float', 'Double', 'String', 'Character', 'Boolean'];
 
   export default {
     name: "ParamTree",
     data() {
       return {
-        definitions: JSON.parse(sessionStorage.definitions),
         show: false,
         isBaseType: false
       }
@@ -42,7 +43,7 @@
         if (this.isBaseType) {
           return;
         }
-        const definition = this.definitions[this.type.name];
+        const definition = Parse.getDefinition(this.type.name);
         if (definition.type === 'object') {
           return definition.properties;
         }

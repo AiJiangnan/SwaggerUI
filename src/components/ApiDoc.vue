@@ -133,8 +133,6 @@
     },
     data() {
       return {
-        definitions: JSON.parse(sessionStorage.definitions),
-
         showParamInfo: false,
         showTest: false,
         showExample: false,
@@ -150,30 +148,23 @@
       getType: schema => Parse.getType(schema),
       getResp() {
         const resp = this.api.responses['200'];
-        if (resp.schema.type) {
-          return [];
-        }
-        let arr = [];
-        this.getRespRef({ref: resp.schema.$ref, parent: ''}, data => {
-          arr = data.respArr;
-          data.refs.map((ref, i) => {
-            this.getRespRef(ref, d => {
-              arr.concat(d.respArr);
-              d.respArr.map((v, j) => {
-                arr.push(v);
-              });
-            });
-          });
+        if (resp.schema.type) return [];
+        const res = this.getRespRef({ref: resp.schema.$ref, parent: ''});
+        let arr = res.respArr;
+        res.refs.map(ref => {
+          const res2 = this.getRespRef(ref);
+          arr.push(...res2.respArr);
+          res2.refs.map(ref2 => arr.push(...this.getRespRef(ref2).respArr));
         });
         return arr;
       },
-      getRespRef(param, callback) {
-        const definition = this.definitions[Parse.getRefName(param.ref)];
-        if (definition.type === 'object') {
+      getRespRef(param) {
+        const def = Parse.getDefinition(Parse.getRefName(param.ref));
+        if (def.type === 'object') {
           let respArr = [];
           let refs = [];
-          for (let k in definition.properties) {
-            let res = definition.properties[k];
+          for (let k in def.properties) {
+            let res = def.properties[k];
             res.name = k;
             res.parent = param.parent;
             if (res.$ref) {
@@ -183,7 +174,7 @@
             }
             respArr.push(res);
           }
-          callback({respArr: respArr, refs: refs});
+          return {respArr: respArr, refs: refs};
         }
       },
 

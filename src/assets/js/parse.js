@@ -1,4 +1,5 @@
 const parse = {
+  definitions: JSON.parse(sessionStorage.definitions),
   getRefName(ref) {
     return ref.replace('#/definitions/', '');
   },
@@ -23,6 +24,9 @@ const parse = {
     }
     return result;
   },
+  getDefinition(name) {
+    return this.definitions[name];
+  }
 };
 
 export default parse;
