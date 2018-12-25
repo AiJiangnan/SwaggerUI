@@ -28,9 +28,6 @@
         }
         return [];
       }
-    },
-    mounted() {
-      console.log('resp:', this.resp);
     }
   }
 </script>

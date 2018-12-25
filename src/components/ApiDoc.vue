@@ -57,10 +57,9 @@
       <tr class="data-info" v-for="field in getResp()">
         <td>{{field.name}}</td>
         <td>{{getType(field).desc}}</td>
-        <td>无</td>
+        <td>{{field.parent}}</td>
         <td>{{field.description}}</td>
       </tr>
-      <RespTree :resp="getResp()"/>
     </table>
     <table>
       <tr>
@@ -122,6 +121,7 @@
 <script>
   import ParamTree from "./ParamTree";
   import RespTree from "./RespTree";
+  import Parse from "../assets/js/parse";
 
   export default {
     name: "ApiDoc",
@@ -147,41 +147,44 @@
       }
     },
     methods: {
-      getRefName(ref) {
-        return ref.replace('#/definitions/', '');
-      },
-      getType(schema) {
-        let result = {name: '', desc: ''};
-        if (!schema) return result;
-        if (schema.type === 'array') {
-          const ref = schema.items.$ref;
-          result.name = this.getRefName(ref);
-          result.desc = 'Array<' + this.getRefName(ref) + '>';
-        } else if (schema.type) {
-          result.name = schema.type;
-          result.desc = schema.type;
-        } else {
-          result.name = this.getRefName(schema.$ref);
-          result.desc = result.name;
-        }
-        return result;
-      },
+      getType: schema => Parse.getType(schema),
       getResp() {
         const resp = this.api.responses['200'];
         if (resp.schema.type) {
           return [];
         }
-        const definition = this.definitions[this.getRefName(resp.schema.$ref)];
+        let arr = [];
+        this.getRespRef({ref: resp.schema.$ref, parent: ''}, data => {
+          arr = data.respArr;
+          data.refs.map((ref, i) => {
+            this.getRespRef(ref, d => {
+              arr.concat(d.respArr);
+              d.respArr.map((v, j) => {
+                arr.push(v);
+              });
+            });
+          });
+        });
+        return arr;
+      },
+      getRespRef(param, callback) {
+        const definition = this.definitions[Parse.getRefName(param.ref)];
         if (definition.type === 'object') {
           let respArr = [];
+          let refs = [];
           for (let k in definition.properties) {
             let res = definition.properties[k];
             res.name = k;
+            res.parent = param.parent;
+            if (res.$ref) {
+              refs.push({parent: res.name, ref: res.$ref});
+            } else if (res.type === 'array' && res.items.$ref) {
+              refs.push({parent: res.name, ref: res.items.$ref});
+            }
             respArr.push(res);
           }
-          return respArr;
+          callback({respArr: respArr, refs: refs});
         }
-        return [];
       },
 
       showTestFnc(params) {
