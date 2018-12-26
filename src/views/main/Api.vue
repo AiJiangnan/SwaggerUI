@@ -1,29 +1,28 @@
 <template>
   <div>
     <Tabs type="card">
-      <TabPane :label="method.method.toUpperCase()" v-for="method in methods">
-        <Apidoc :url="url" :method="method.method.toUpperCase()" :api="method.api"></Apidoc>
+      <TabPane v-for="(m,i) in methods" :label="m.method.toUpperCase()" :key="i">
+        <ApiDoc :url="url" :method="m.method" :api="m.api"/>
       </TabPane>
     </Tabs>
   </div>
 </template>
 
 <script>
-  import Apidoc from "./apidoc";
+  import ApiDoc from "../../components/ApiDoc";
 
   export default {
-    components: {Apidoc},
+    components: {ApiDoc: ApiDoc},
     data() {
       return {
         url: this.$route.query.path,
-        paths: JSON.parse(sessionStorage.paths),
         methods: []
       }
     },
     methods: {
-      init() {
+      parseApiMethod() {
         let m = [];
-        let methods = this.paths[this.url];
+        const methods = JSON.parse(sessionStorage.path);
         for (let method in methods) {
           let ele = {};
           ele.method = method;
@@ -34,17 +33,13 @@
       }
     },
     mounted() {
-      this.init();
+      this.parseApiMethod();
     },
     watch: {
       '$route'(to) {
         this.url = to.query.path;
-        this.init();
+        this.parseApiMethod();
       }
     }
   }
 </script>
-
-<style scoped>
-
-</style>
