@@ -17,7 +17,7 @@
   </tr>
   <tr v-if="show" v-for="(value,key) in parseParam()">
     <td style="padding-left:30px;">{{key}}</td>
-    <td>{{value.type}}</td>
+    <td>{{getType(value).desc}}</td>
     <td>{{value.description}}</td>
     <td></td>
     <td></td>
@@ -49,6 +49,12 @@
       param: {type: Object, default: null}
     },
     methods: {
+      /**
+       * 通过对象schema获取类型信息
+       * @param schema
+       * @returns {*|{name: string, desc: string}}
+       */
+      getType: schema => Parse.getType(schema),
       /**
        * 解析二级参数
        * @returns {*}
