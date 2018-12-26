@@ -97,7 +97,8 @@
       </table>
     </Drawer>
     <Drawer title="测试" width="600" :closable="false" v-model="showTest">
-      <Form ref="formTest" :model="formTest" :rules="formTestValid" :label-width="80">
+      // TODO
+      <!--<Form ref="formTest" :model="formTest" :rules="formTestValid" :label-width="80">
         <FormItem label="url">
           <Input v-model="formTest.$url" disabled></Input>
         </FormItem>
@@ -110,10 +111,10 @@
           <Button type="primary" @click="handleSubmit('formTest')">提交</Button>
           <Button style="margin-left: 8px" @click="handleReset('formTest')">重置</Button>
         </FormItem>
-      </Form>
+      </Form>-->
     </Drawer>
     <Drawer title="示例" width="600" :closable="false" v-model="showExample">
-      todo
+      // TODO
     </Drawer>
   </div>
 </template>
