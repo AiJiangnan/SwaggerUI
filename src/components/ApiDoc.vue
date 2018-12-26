@@ -168,13 +168,8 @@
       getResp() {
         const resp = this.api.responses['200'];
         if (!resp) return [];
-        let refParam = '';
-        if (resp.schema.type === 'array') {
-          refParam = resp.schema.items.$ref;
-        } else {
-          refParam = resp.schema.$ref;
-        }
-        const res = this.parseResp({ref: refParam, parent: ''});
+        const type = this.getType(resp.schema);
+        const res = this.parseResp({ref: type.name, parent: ''});
         let arr = res.respArr;
         res.refs.map(ref => {
           const res2 = this.parseResp(ref);
