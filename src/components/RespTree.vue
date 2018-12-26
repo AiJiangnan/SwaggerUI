@@ -1,3 +1,7 @@
+<!--
+  响应信息组件（无用）
+  next version: 可能将来会用到
+-->
 <template>
   <tbody>
   <tr v-for="field in getObject()">

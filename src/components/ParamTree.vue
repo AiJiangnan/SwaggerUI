@@ -1,3 +1,7 @@
+<!--
+  接口二级入参信息组件
+  next version:
+-->
 <template>
   <tbody>
   <tr class="data-info">
@@ -11,7 +15,7 @@
     <td>{{param.required?'是':'否'}}</td>
     <td>{{param.in}}</td>
   </tr>
-  <tr v-if="show" v-for="(value,key) in getObject()">
+  <tr v-if="show" v-for="(value,key) in parseParam()">
     <td style="padding-left:30px;">{{key}}</td>
     <td>{{value.type}}</td>
     <td>{{value.description}}</td>
@@ -24,13 +28,19 @@
 <script>
   import Parse from "../assets/js/parse";
 
+  /**
+   * Java基本数据类型的包装类，不用解析引用
+   * @type {string[]}
+   */
   const baseType = ['Byte', 'Short', 'Integer', 'Long', 'Float', 'Double', 'String', 'Character', 'Boolean'];
 
   export default {
     name: "ParamTree",
     data() {
       return {
+        // 展示下级字段状态控制
         show: false,
+        // 是否为基本数据类型
         isBaseType: false
       }
     },
@@ -39,7 +49,11 @@
       param: {type: Object, default: null}
     },
     methods: {
-      getObject() {
+      /**
+       * 解析二级参数
+       * @returns {*}
+       */
+      parseParam() {
         if (this.isBaseType) {
           return;
         }
@@ -50,6 +64,9 @@
         return definition;
       }
     },
+    /**
+     * 创建组件完后判断是否为基本数据类型
+     */
     created() {
       this.isBaseType = baseType.indexOf(this.type.name) > -1;
     }

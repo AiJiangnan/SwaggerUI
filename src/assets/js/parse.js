@@ -1,8 +1,25 @@
+/**
+ * 文档解析工具
+ * @type {{definitions: any, getRefName(*): *, getType(*=): *, getDefinition(*): *}}
+ */
 const parse = {
+  /**
+   * 从本地会话存储取得对象资源
+   */
   definitions: JSON.parse(sessionStorage.definitions),
+  /**
+   * 通过对象引用获取对象名称
+   * @param ref 对象引用
+   * @returns {*} 对象名称
+   */
   getRefName(ref) {
     return ref.replace('#/definitions/', '');
   },
+  /**
+   * 通过对象schema获取类型信息
+   * @param schema
+   * @returns {{name: string, desc: string}} name：对象类型名称，desc：对象展示的类型名称
+   */
   getType(schema) {
     let result = {name: '', desc: ''};
     if (!schema) return result;
@@ -24,6 +41,11 @@ const parse = {
     }
     return result;
   },
+  /**
+   * 通过对象类型名称获取对象资源
+   * @param name 对象类型名称
+   * @returns {*} 对象资源
+   */
   getDefinition(name) {
     return this.definitions[name];
   }

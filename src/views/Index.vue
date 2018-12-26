@@ -1,3 +1,7 @@
+<!--
+  主页面视图
+  next version:
+-->
 <template>
   <div class="layout">
     <Layout :style="{height:'100vh'}">
@@ -33,21 +37,34 @@
     components: {About, ApiMenu},
     data() {
       return {
+        // 接口资源信息，可以多个，通过选择器来选择
         resources: [],
+        // 通过选择器选中的当前资源
         resource: {},
+        // 通过选择器选中的当前资源的值，用来绑定默认值
         selectResource: '',
+        // 当前选择的接口资源
         apiDoc: {
+          // 定义info字段防止空指针
           info: {}
         },
+        // 通过接口的tag解析成页面菜单
         apiMenu: [],
+        // 展示关于信息框状态控制
         about: {show: false}
       }
     },
     methods: {
+      /**
+       * 选择器选择事件，更改接口资源
+       */
       changeResource(value) {
         this.resource = value;
         this.getApiDoc();
       },
+      /**
+       * 加载接口资源信息
+       */
       getResources(callback) {
         this.ajax.get('/swagger-resources', data => {
           this.resources = data;
@@ -57,6 +74,9 @@
           callback();
         });
       },
+      /**
+       * 加载对应选择的资源
+       */
       getApiDoc() {
         this.ajax.get(this.selectResource, data => {
           this.apiDoc = data;
@@ -65,6 +85,9 @@
           this.parseApiMenu();
         });
       },
+      /**
+       * 从接口资源解析关于信息框内容
+       */
       parseAbout() {
         let [about, apiDoc] = [this.about, this.apiDoc];
         about.title = apiDoc.info.title;
@@ -73,6 +96,9 @@
         about.description = apiDoc.info.description;
         about.swagger = apiDoc.swagger;
       },
+      /**
+       * 从接口资源中解析页面菜单
+       */
       parseApiMenu() {
         const [tags, paths] = [this.apiDoc.tags, this.apiDoc.paths];
         let menusArr = this.apiMenu;
@@ -99,6 +125,9 @@
         }
       }
     },
+    /**
+     * 组件加载后加载资源
+     */
     mounted() {
       this.getResources(() => this.getApiDoc());
     }

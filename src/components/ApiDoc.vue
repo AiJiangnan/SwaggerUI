@@ -1,3 +1,7 @@
+<!--
+  API文档组件
+  next version: 添加测试功能，添加响应JSON示例
+-->
 <template>
   <div id="data">
     <table>
@@ -128,12 +132,16 @@
     name: "ApiDoc",
     components: {RespTree, ParamTree},
     props: {
+      // 接口的URL
       url: {type: String, default: ''},
+      // 接口的请求方法
       method: {type: String, default: ''},
+      // 接口的所有信息
       api: {type: Object, default: null}
     },
     data() {
       return {
+        /*****************do nothing********************/
         showParamInfo: false,
         showTest: false,
         showExample: false,
@@ -143,23 +151,38 @@
           $url: this.url
         },
         formTestValid: {}
+        /*****************do nothing********************/
       }
     },
     methods: {
+      /**
+       * 通过对象schema获取类型信息
+       * @param schema
+       * @returns {*|{name: string, desc: string}}
+       */
       getType: schema => Parse.getType(schema),
+      /**
+       * 获取接口响应数据信息，目前解析三层嵌套状态
+       * @returns {Array}
+       */
       getResp() {
         const resp = this.api.responses['200'];
         if (resp.schema.type) return [];
-        const res = this.getRespRef({ref: resp.schema.$ref, parent: ''});
+        const res = this.parseResp({ref: resp.schema.$ref, parent: ''});
         let arr = res.respArr;
         res.refs.map(ref => {
-          const res2 = this.getRespRef(ref);
+          const res2 = this.parseResp(ref);
           arr.push(...res2.respArr);
-          res2.refs.map(ref2 => arr.push(...this.getRespRef(ref2).respArr));
+          res2.refs.map(ref2 => arr.push(...this.parseResp(ref2).respArr));
         });
         return arr;
       },
-      getRespRef(param) {
+      /**
+       * 解析接口响应数据
+       * @param param
+       * @returns {{respArr: Array, refs: Array}}
+       */
+      parseResp(param) {
         const def = Parse.getDefinition(Parse.getRefName(param.ref));
         if (def.type === 'object') {
           let respArr = [];
@@ -178,7 +201,7 @@
           return {respArr: respArr, refs: refs};
         }
       },
-
+      /*****************do nothing********************/
       showTestFnc(params) {
         if (params) {
           params.map((param, i) => {
@@ -219,6 +242,7 @@
         this.formTest = {};
         this.$refs[name].resetFields();
       }
+      /*****************do nothing********************/
     }
   }
 </script>
