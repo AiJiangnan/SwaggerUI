@@ -13,6 +13,7 @@ const parse = {
    * @returns {*} 对象名称
    */
   getRefName(ref) {
+    if (!ref) return;
     return ref.replace('#/definitions/', '');
   },
   /**
@@ -26,12 +27,11 @@ const parse = {
     if (schema.type === 'array') {
       if (schema.items.type) {
         result.name = schema.items.type;
-        result.desc = schema.items.type;
       } else {
         const ref = schema.items.$ref;
         result.name = this.getRefName(ref);
-        result.desc = 'Array<' + this.getRefName(ref) + '>';
       }
+      result.desc = 'Array<' + result.name + '>';
     } else if (schema.type) {
       result.name = schema.type;
       result.desc = schema.type;

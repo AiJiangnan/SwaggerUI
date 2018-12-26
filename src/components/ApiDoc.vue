@@ -38,7 +38,7 @@
       </tr>
       <tr v-for="param in api.parameters" class="data-info" v-if="param.type">
         <td>{{param.name}}</td>
-        <td>{{param.type}}</td>
+        <td>{{getType(param).desc}}</td>
         <td>{{param.description}}</td>
         <td>{{param.required?'是':'否'}}</td>
         <td>{{param.in}}</td>
@@ -167,8 +167,14 @@
        */
       getResp() {
         const resp = this.api.responses['200'];
-        if (!resp || resp.schema.type) return [];
-        const res = this.parseResp({ref: resp.schema.$ref, parent: ''});
+        if (!resp) return [];
+        let refParam = '';
+        if (resp.schema.type === 'array') {
+          refParam = resp.schema.items.$ref;
+        } else {
+          refParam = resp.schema.$ref;
+        }
+        const res = this.parseResp({ref: refParam, parent: ''});
         let arr = res.respArr;
         res.refs.map(ref => {
           const res2 = this.parseResp(ref);
@@ -184,6 +190,7 @@
        */
       parseResp(param) {
         const def = Parse.getDefinition(Parse.getRefName(param.ref));
+        if (!def) return {respArr: [], refs: []};
         if (def.type === 'object') {
           let respArr = [];
           let refs = [];
