@@ -40,7 +40,7 @@
         // 接口资源信息，可以多个，通过选择器来选择
         resources: [],
         // 通过选择器选中的当前资源
-        resource: {},
+        resource: {label: 'SwaggerUI'},
         // 通过选择器选中的当前资源的值，用来绑定默认值
         selectResource: '',
         // 当前选择的接口资源
@@ -78,7 +78,8 @@
        * 加载对应选择的资源
        */
       getApiDoc() {
-        this.ajax.get(this.selectResource, data => {
+        // this.ajax.get(this.selectResource, data => {
+        this.ajax.get('/v2/swagger.json', data => {
           this.apiDoc = data;
           sessionStorage.definitions = JSON.stringify(data.definitions);
           this.parseAbout();
@@ -129,7 +130,8 @@
      * 组件加载后加载资源
      */
     mounted() {
-      this.getResources(() => this.getApiDoc());
+      // this.getResources(() => this.getApiDoc());
+      this.getApiDoc();
     }
   }
 </script>
