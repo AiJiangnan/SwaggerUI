@@ -102,35 +102,21 @@
     </Drawer>
     <Drawer title="测试" width="600" :closable="false" v-model="showTest">
       // TODO
-      <!--<Form ref="formTest" :model="formTest" :rules="formTestValid" :label-width="80">
-        <FormItem label="url">
-          <Input v-model="formTest.$url" disabled></Input>
-        </FormItem>
-        <FormItem v-for="param in paramTest" :label="param.name" :prop="param.name" :key="param.name">
-          <Input v-model="formTest[param.name]" type="textarea" v-if="param.in==='body'"
-                 placeholder="请输入JSON字符串..."></Input>
-          <Input v-model="formTest[param.name]" v-else :placeholder="'请输入'+param.description+'...'"></Input>
-        </FormItem>
-        <FormItem>
-          <Button type="primary" @click="handleSubmit('formTest')">提交</Button>
-          <Button style="margin-left: 8px" @click="handleReset('formTest')">重置</Button>
-        </FormItem>
-      </Form>-->
     </Drawer>
-    <Drawer title="示例" width="600" :closable="false" v-model="showExample">
-      // TODO
+    <Drawer title="示例" width="800" :closable="false" v-model="showExample">
+      <RespExample :root="api.responses['200']" :resp="getResp()"/>
     </Drawer>
   </div>
 </template>
 
 <script>
   import ParamTree from "./ParamTree";
-  import RespTree from "./RespTree";
   import Parse from "../assets/js/parse";
+  import RespExample from "./RespExample";
 
   export default {
     name: "ApiDoc",
-    components: {RespTree, ParamTree},
+    components: {RespExample, ParamTree},
     props: {
       // 接口的URL
       url: {type: String, default: ''},
