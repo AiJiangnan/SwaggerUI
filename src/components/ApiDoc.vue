@@ -49,7 +49,7 @@
       <tr>
         <td colspan="4" class="data-label">返回结果说明：<code v-if="api.produces">Content-Type:
           {{api.produces.join(';')}}</code>
-          <a class="setting" @click="showExampleFnc()">[示例]</a>
+          <a class="setting" @click="showExample=true">[示例]</a>
         </td>
       </tr>
       <tr class="data-head">
@@ -84,22 +84,6 @@
         <td></td>
       </tr>
     </table>
-    <Drawer title="输入对象参数" width="600" :closable="false" v-model="showParamInfo">
-      <table class="info-table">
-        <tr class="data-head">
-          <td>参数名称</td>
-          <td>数据类型</td>
-          <td>参数描述</td>
-          <td>是否必须</td>
-        </tr>
-        <tr class="data-info" v-for="(val,key) in paramInfo.properties">
-          <td>{{key}}</td>
-          <td>{{val.type}}</td>
-          <td>{{val.description}}</td>
-          <td>{{val.required?'是':'否'}}</td>
-        </tr>
-      </table>
-    </Drawer>
     <Drawer title="测试" width="600" :closable="false" v-model="showTest">
       // TODO
     </Drawer>
@@ -111,8 +95,8 @@
 
 <script>
   import ParamTree from "./ParamTree";
-  import Parse from "../assets/js/parse";
   import RespExample from "./RespExample";
+  import Parse from "../assets/js/parse";
 
   export default {
     name: "ApiDoc",
@@ -127,11 +111,11 @@
     },
     data() {
       return {
-        /*****************do nothing********************/
-        showParamInfo: false,
-        showTest: false,
+        // 显示响应示例JSON弹框
         showExample: false,
-        paramInfo: {},
+        // 显示测试弹框
+        showTest: false,
+        /*****************do nothing********************/
         paramTest: [],
         formTest: {
           $url: this.url
@@ -202,9 +186,6 @@
         }
         this.paramTest = params;
         this.showTest = true;
-      },
-      showExampleFnc() {
-        this.showExample = true;
       },
       handleSubmit(name) {
         this.$refs[name].validate((valid) => {
