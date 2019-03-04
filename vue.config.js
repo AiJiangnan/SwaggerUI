@@ -11,5 +11,6 @@ module.exports = {
     },
     host: 'localhost',
     port: 9080
-  }
+  },
+  productionSourceMap: false
 };
