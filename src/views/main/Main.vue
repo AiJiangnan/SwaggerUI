@@ -1,3 +1,7 @@
+<!--
+  二级主页面视图
+  next version: 展示更多有用的内容
+-->
 <template>
   <div style="background:#eee;padding: 20px">
     <Card :bordered="false">

@@ -1,3 +1,7 @@
+<!--
+  关于信息组件
+  next version: 可以加入帮助文档
+-->
 <template>
   <Modal v-model="show" :title="content.title" :closable="false" :mask-closable="false">
     <b>主机: </b><span>{{content.host}}</span><br>
@@ -15,7 +19,9 @@
   export default {
     name: "About",
     props: {
+      // 展示状态控制
       show: {type: Boolean, default: false},
+      // 展示内容控制
       content: {
         type: Object, default() {
           return {
@@ -29,6 +35,9 @@
       }
     },
     methods: {
+      /**
+       * 单击确定按钮关闭
+       */
       close() {
         this.$emit('click');
       }

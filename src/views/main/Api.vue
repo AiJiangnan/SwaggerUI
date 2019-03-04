@@ -1,3 +1,7 @@
+<!--
+  接口文档Tab页面视图
+  next version:
+-->
 <template>
   <div>
     <Tabs type="card">
@@ -15,11 +19,16 @@
     components: {ApiDoc: ApiDoc},
     data() {
       return {
+        // 单击菜单获取要展示的接口文档
         url: this.$route.query.path,
+        // 接口支持的请求方法：GET、POST...
         methods: []
       }
     },
     methods: {
+      /**
+       * 解析接口中的请求方法，为了防止刷新使用本地存储
+       */
       parseApiMethod() {
         let m = [];
         const methods = JSON.parse(sessionStorage.path);
@@ -32,10 +41,17 @@
         this.methods = m;
       }
     },
+    /**
+     * 加载完后解析一次
+     */
     mounted() {
       this.parseApiMethod();
     },
     watch: {
+      /**
+       * 监听路由改变解析一次
+       * @param to
+       */
       '$route'(to) {
         this.url = to.query.path;
         this.parseApiMethod();

@@ -1,3 +1,7 @@
+<!--
+  API文档组件
+  next version: 添加测试功能，添加响应JSON示例
+-->
 <template>
   <div id="data">
     <table>
@@ -34,7 +38,7 @@
       </tr>
       <tr v-for="param in api.parameters" class="data-info" v-if="param.type">
         <td>{{param.name}}</td>
-        <td>{{param.type}}</td>
+        <td>{{getType(param).desc}}</td>
         <td>{{param.description}}</td>
         <td>{{param.required?'是':'否'}}</td>
         <td>{{param.in}}</td>
@@ -45,7 +49,7 @@
       <tr>
         <td colspan="4" class="data-label">返回结果说明：<code v-if="api.produces">Content-Type:
           {{api.produces.join(';')}}</code>
-          <a class="setting" @click="showExampleFnc()">[示例]</a>
+          <a class="setting" @click="showExample=true">[示例]</a>
         </td>
       </tr>
       <tr class="data-head">
@@ -80,87 +84,78 @@
         <td></td>
       </tr>
     </table>
-    <Drawer title="输入对象参数" width="600" :closable="false" v-model="showParamInfo">
-      <table class="info-table">
-        <tr class="data-head">
-          <td>参数名称</td>
-          <td>数据类型</td>
-          <td>参数描述</td>
-          <td>是否必须</td>
-        </tr>
-        <tr class="data-info" v-for="(val,key) in paramInfo.properties">
-          <td>{{key}}</td>
-          <td>{{val.type}}</td>
-          <td>{{val.description}}</td>
-          <td>{{val.required?'是':'否'}}</td>
-        </tr>
-      </table>
-    </Drawer>
     <Drawer title="测试" width="600" :closable="false" v-model="showTest">
       // TODO
-      <!--<Form ref="formTest" :model="formTest" :rules="formTestValid" :label-width="80">
-        <FormItem label="url">
-          <Input v-model="formTest.$url" disabled></Input>
-        </FormItem>
-        <FormItem v-for="param in paramTest" :label="param.name" :prop="param.name" :key="param.name">
-          <Input v-model="formTest[param.name]" type="textarea" v-if="param.in==='body'"
-                 placeholder="请输入JSON字符串..."></Input>
-          <Input v-model="formTest[param.name]" v-else :placeholder="'请输入'+param.description+'...'"></Input>
-        </FormItem>
-        <FormItem>
-          <Button type="primary" @click="handleSubmit('formTest')">提交</Button>
-          <Button style="margin-left: 8px" @click="handleReset('formTest')">重置</Button>
-        </FormItem>
-      </Form>-->
     </Drawer>
-    <Drawer title="示例" width="600" :closable="false" v-model="showExample">
-      // TODO
+    <Drawer title="示例" width="800" :closable="false" v-model="showExample">
+      <RespExample :root="api.responses['200']" :resp="getResp()"/>
     </Drawer>
   </div>
 </template>
 
 <script>
   import ParamTree from "./ParamTree";
-  import RespTree from "./RespTree";
+  import RespExample from "./RespExample";
   import Parse from "../assets/js/parse";
 
   export default {
     name: "ApiDoc",
-    components: {RespTree, ParamTree},
+    components: {RespExample, ParamTree},
     props: {
+      // 接口的URL
       url: {type: String, default: ''},
+      // 接口的请求方法
       method: {type: String, default: ''},
+      // 接口的所有信息
       api: {type: Object, default: null}
     },
     data() {
       return {
-        showParamInfo: false,
-        showTest: false,
+        // 显示响应示例JSON弹框
         showExample: false,
-        paramInfo: {},
+        // 显示测试弹框
+        showTest: false,
+        /*****************do nothing********************/
         paramTest: [],
         formTest: {
           $url: this.url
         },
         formTestValid: {}
+        /*****************do nothing********************/
       }
     },
     methods: {
+      /**
+       * 通过对象schema获取类型信息
+       * @param schema
+       * @returns {*|{name: string, desc: string}}
+       */
       getType: schema => Parse.getType(schema),
+      /**
+       * 获取接口响应数据信息，目前解析三层嵌套状态
+       * @returns {Array}
+       */
       getResp() {
         const resp = this.api.responses['200'];
-        if (resp.schema.type) return [];
-        const res = this.getRespRef({ref: resp.schema.$ref, parent: ''});
+        if (!resp) return [];
+        const type = this.getType(resp.schema);
+        const res = this.parseResp({ref: type.name, parent: ''});
         let arr = res.respArr;
         res.refs.map(ref => {
-          const res2 = this.getRespRef(ref);
+          const res2 = this.parseResp(ref);
           arr.push(...res2.respArr);
-          res2.refs.map(ref2 => arr.push(...this.getRespRef(ref2).respArr));
+          res2.refs.map(ref2 => arr.push(...this.parseResp(ref2).respArr));
         });
         return arr;
       },
-      getRespRef(param) {
+      /**
+       * 解析接口响应数据
+       * @param param
+       * @returns {{respArr: Array, refs: Array}}
+       */
+      parseResp(param) {
         const def = Parse.getDefinition(Parse.getRefName(param.ref));
+        if (!def) return {respArr: [], refs: []};
         if (def.type === 'object') {
           let respArr = [];
           let refs = [];
@@ -178,7 +173,7 @@
           return {respArr: respArr, refs: refs};
         }
       },
-
+      /*****************do nothing********************/
       showTestFnc(params) {
         if (params) {
           params.map((param, i) => {
@@ -191,9 +186,6 @@
         }
         this.paramTest = params;
         this.showTest = true;
-      },
-      showExampleFnc() {
-        this.showExample = true;
       },
       handleSubmit(name) {
         this.$refs[name].validate((valid) => {
@@ -219,6 +211,7 @@
         this.formTest = {};
         this.$refs[name].resetFields();
       }
+      /*****************do nothing********************/
     }
   }
 </script>
