@@ -19,7 +19,7 @@
     <td style="padding-left:30px;">{{key}}</td>
     <td>{{getType(value).desc}}</td>
     <td>{{value.description}}</td>
-    <td></td>
+    <td>{{value.required}}</td>
     <td></td>
   </tr>
   </tbody>
@@ -32,7 +32,7 @@
    * Java基本数据类型的包装类，不用解析引用
    * @type {string[]}
    */
-  const baseType = ['Byte', 'Short', 'Integer', 'Long', 'Float', 'Double', 'String', 'Character', 'Boolean'];
+  const baseType = ['BYTE', 'SHORT', 'INTEGER', 'LONG', 'FLOAT', 'DOUBLE', 'STRING', 'CHARACTER', 'BOOLEAN'];
 
   export default {
     name: "ParamTree",
@@ -65,7 +65,13 @@
         }
         const definition = Parse.getDefinition(this.type.name);
         if (definition.type === 'object') {
-          return definition.properties;
+          let prop = definition.properties;
+          if(definition.required){
+            definition.required.forEach(ele => {
+              prop[ele].required = '是';
+            });
+          }
+          return prop;
         }
         return definition;
       }
@@ -74,7 +80,7 @@
      * 创建组件完后判断是否为基本数据类型
      */
     created() {
-      this.isBaseType = baseType.indexOf(this.type.name) > -1;
+      this.isBaseType = baseType.indexOf(this.type.name.toUpperCase()) > -1;
     }
   }
 </script>

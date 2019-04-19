@@ -3,13 +3,13 @@ module.exports = {
   devServer: {
     proxy: {
       '/': {
-        target: 'https://petstore.swagger.io',
-        // target: 'http://localhost:8080',
+        // target: 'http://10.250.1.118:9000',
+        target: 'http://localhost:8080',
         changeOrigin: true,
         ws: false
       }
     },
-    host: 'localhost',
+    // host: '127.0.0.1',
     port: 9080
   },
   productionSourceMap: false

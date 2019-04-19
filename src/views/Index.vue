@@ -78,8 +78,8 @@
        * 加载对应选择的资源
        */
       getApiDoc() {
-        // this.ajax.get(this.selectResource, data => {
-        this.ajax.get('/v2/swagger.json', data => {
+        this.ajax.get(this.selectResource, data => {
+        // this.ajax.get('/v2/swagger.json', data => {
           this.apiDoc = data;
           sessionStorage.definitions = JSON.stringify(data.definitions);
           this.parseAbout();
@@ -130,8 +130,8 @@
      * 组件加载后加载资源
      */
     mounted() {
-      // this.getResources(() => this.getApiDoc());
-      this.getApiDoc();
+      this.getResources(() => this.getApiDoc());
+      // this.getApiDoc();
     }
   }
 </script>
